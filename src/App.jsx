@@ -46,7 +46,7 @@ const App = () => {
   );
 
   const handleLogin = () => {
-    if (password === "secret") {
+    if (password === process.env.REACT_APP_PASSWORD) {
       setAuthenticated(true);
     } else {
       alert("Incorrect password. Try again.");
