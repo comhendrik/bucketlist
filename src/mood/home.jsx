@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, Title, Text } from "@tremor/react";
 import {
   Smile,
@@ -7,6 +7,8 @@ import {
   Frown,
   Angry,
 } from "lucide-react";
+import MoodService from "../services/MoodService";
+import MoodHistory from "./moodHistory";
 
 const moods = [
   {
@@ -42,55 +44,78 @@ const moods = [
 ];
 
 export default function MoodCheckIn() {
-  const [selectedMood, setSelectedMood] = useState(null);
+  const [hasCheckedInToday, setHasCheckedInToday] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkMood = async () => {
+      const exists = await MoodService.hasMoodForToday();
+      setHasCheckedInToday(exists);
+      setLoading(false);
+    };
+
+    checkMood();
+  }, []);
+
+  const handleMoodClick = async (level) => {
+    await MoodService.createMood(level);
+    setHasCheckedInToday(true);
+  };
+
+
+  //TODO: Allgemeine Loadingkomponente bauen
+
+  if (loading) {
+    return (
+      <div className="max-w-2xl mx-auto mt-10 px-4">
+        <Card>
+          <Text>Loading...</Text>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-2xl mx-auto mt-10 px-4">
       <Card>
         <Title>🌤 Daily Mood Check-In</Title>
-        <Text className="mt-2">
-          How are you feeling today?
-        </Text>
 
-        <div className="grid grid-cols-5 gap-4 mt-8">
-          {moods.map((mood) => {
-            const Icon = mood.icon;
-
-            return (
-              <button
-                key={mood.id}
-                onClick={() => setSelectedMood(mood.id)}
-                className={`
-                  rounded-xl p-4 transition-all duration-200
-                  flex flex-col items-center gap-3
-                  text-white shadow-sm
-                  ${mood.color}
-                  ${
-                    selectedMood === mood.id
-                      ? "ring-4 ring-blue-500 scale-105"
-                      : "hover:scale-105"
-                  }
-                `}
-              >
-                <Icon size={36} strokeWidth={2.2} />
-                <span className="text-sm font-medium">
-                  {mood.label}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-
-        {selectedMood && (
-          <Card className="mt-8 bg-slate-50">
-            <Text>
-              Today's mood:{" "}
-              <span className="font-semibold">
-                {moods.find((m) => m.id === selectedMood)?.label}
-              </span>
+        {hasCheckedInToday ? (
+          <Text className="mt-4 text-green-600 font-medium">
+            ✅ You have already checked in today. Come back tomorrow!
+          </Text>
+        ) : (
+          <>
+            <Text className="mt-2">
+              How are you feeling today?
             </Text>
-          </Card>
+
+            <div className="grid grid-cols-5 gap-4 mt-8">
+              {moods.map((mood) => {
+                const Icon = mood.icon;
+
+                return (
+                  <button
+                    key={mood.id}
+                    onClick={() => handleMoodClick(mood.id)}
+                    className={`
+                      rounded-xl p-4 transition-all duration-200
+                      flex flex-col items-center gap-3
+                      text-white shadow-sm
+                      ${mood.color}
+                    `}
+                  >
+                    <Icon size={36} strokeWidth={2.2} />
+                    <span className="text-sm font-medium">
+                      {mood.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </>
         )}
+        <MoodHistory></MoodHistory>
       </Card>
     </div>
   );

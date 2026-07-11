@@ -1,4 +1,5 @@
 export interface Mood {
-  id: number;
-  
+  id: string;
+  level: number;
+  created: Date;
 }
