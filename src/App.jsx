@@ -14,8 +14,20 @@ import Journal from "./journal/home";
 
 const App = () => {
   const [page, setPage] = useState("home");
+  const [password, setPassword] = useState("");
+  const [authenticated, setAuthenticated] = useState(false);
+
+  const handleLogin = () => {
+    if (password === process.env.REACT_APP_PASSWORD) {
+      setAuthenticated(true);
+    } else {
+      alert("Incorrect password. Try again.");
+      setPassword("");
+    }
+  };
 
   const renderPage = () => {
+    
     switch (page) {
       case "home":
         return (
@@ -78,6 +90,26 @@ const App = () => {
     { id: "settings", icon: Settings },
   ];
 
+  if (!authenticated) {
+      return (
+        <div className="flex flex-col items-center justify-center h-screen p-4">
+          <h1 className="text-3xl font-bold mb-4">🔒 Enter Password</h1>
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full max-w-xs p-2 border rounded mb-2"
+          />
+          <button
+            onClick={handleLogin}
+            className="w-full max-w-xs bg-blue-500 text-white p-2 rounded"
+          >
+            Submit
+          </button>
+        </div>
+      );
+  }
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="p-6">{renderPage()}</div>

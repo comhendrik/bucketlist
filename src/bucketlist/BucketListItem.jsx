@@ -26,7 +26,6 @@ const BucketListItem = ({ item }) => {
         <h3 className={`text-lg font-bold ${isDone ? 'line-through text-gray-400' : ''}`}>
           {item.text}
         </h3>
-        <p className="text-sm text-gray-500">Added by: {item.author}</p>
       </div>
       <div className="flex gap-2">
         <button onClick={toggleDone} className="text-green-600">✅</button>
