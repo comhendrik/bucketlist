@@ -60,8 +60,33 @@ class MoodService {
         return !snapshot.empty;
     }
 
-    async getMonthlyHistoricalData(): Promise<Array<Mood>> {
-        return []
+    async getMonthlyHistoricalData(): Promise<Mood[]> {
+        const now = new Date();
+
+        // First day of current month
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+        // First day of next month
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+        const q = query(
+            collection(db, "mood"),
+            where("created", ">=", startOfMonth),
+            where("created", "<", endOfMonth),
+            orderBy("created", "asc")
+        );
+
+        const snapshot = await getDocs(q);
+
+        return snapshot.docs.map((doc) => {
+            const data = doc.data();
+
+            return {
+                id: doc.id,
+                level: data.level,
+                created: data.created.toDate(), // Firestore Timestamp -> Date
+            } as Mood;
+        });
     }
 
     
